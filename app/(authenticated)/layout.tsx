@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/libs/auth-context";
 import { LoadingSpinner } from "@/app/_components/loading-spinner";
+import { Button } from "@/app/_components/button";
 
 export default function AuthenticatedLayout({
   children,
@@ -12,6 +13,7 @@ export default function AuthenticatedLayout({
 }) {
   const { user, isLoading, logout } = useAuth();
   const router = useRouter();
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -63,7 +65,7 @@ export default function AuthenticatedLayout({
               <span className="text-sm text-slate-300">{user.name}</span>
             </div>
             <button
-              onClick={logout}
+              onClick={() => setShowSignOutModal(true)}
               className="text-sm text-slate-400 hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-white/5 cursor-pointer"
             >
               Sign Out
@@ -74,6 +76,27 @@ export default function AuthenticatedLayout({
 
       {/* Content */}
       <main className="flex-1">{children}</main>
+
+      {/* Sign Out Modal */}
+      {showSignOutModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-slate-900 border border-white/10 p-6 rounded-2xl shadow-2xl max-w-sm w-full animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-white mb-2">Sign Out</h3>
+            <p className="text-slate-400 mb-6">Are you sure you want to sign out? You will need to sign back in to continue taking quizzes.</p>
+            <div className="flex gap-3 justify-end">
+              <Button variant="ghost" onClick={() => setShowSignOutModal(false)}>
+                Cancel
+              </Button>
+              <Button variant="danger" onClick={() => {
+                setShowSignOutModal(false);
+                logout();
+              }}>
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
