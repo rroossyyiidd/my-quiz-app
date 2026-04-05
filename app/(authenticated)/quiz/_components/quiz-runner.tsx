@@ -57,9 +57,9 @@ export function QuizRunner({
   };
 
   return (
-    <div className="min-h-dvh flex flex-col bg-mesh">
+    <div className="flex flex-col bg-mesh h-[calc(100dvh-4rem)]">
       {/* Top bar */}
-      <div className="sticky top-0 z-50 glass border-b border-white/5">
+      <div className="flex-shrink-0 bg-[#0a0e1a]/90 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between mb-3">
             <span
@@ -135,65 +135,67 @@ export function QuizRunner({
         </div>
       </div>
 
-      {/* Question */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
-        <div className="w-full max-w-3xl animate-scale-in" key={questionIndex}>
-          <Card className="p-6 sm:p-8 mb-6 sm:mb-8">
+      {/* Question - fixed, does not scroll */}
+      <div className="flex-shrink-0 px-4 sm:px-6 pt-6 sm:pt-8">
+        <div className="w-full max-w-3xl mx-auto animate-scale-in" key={questionIndex}>
+          <Card className="p-6 sm:p-8">
             <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white leading-relaxed">
               {question.question}
             </h2>
           </Card>
+        </div>
+      </div>
 
-          {/* Options */}
-          <div className="grid gap-3 sm:gap-4">
-            {question.options.map((option, index) => {
-              const isSelected = selectedAnswer === option;
-              const letter = String.fromCharCode(65 + index);
+      {/* Options - scrollable */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 pb-8 sm:pb-12">
+        <div className="w-full max-w-3xl mx-auto grid gap-3 sm:gap-4">
+          {question.options.map((option, index) => {
+            const isSelected = selectedAnswer === option;
+            const letter = String.fromCharCode(65 + index);
 
-              return (
-                <button
-                  key={option}
-                  onClick={() => handleSelect(option)}
-                  disabled={!!selectedAnswer}
+            return (
+              <button
+                key={option}
+                onClick={() => handleSelect(option)}
+                disabled={!!selectedAnswer}
+                className={`
+                  w-full text-left p-4 sm:p-5 rounded-2xl border transition-all duration-300
+                  flex items-center gap-4 group cursor-pointer
+                  ${
+                    isSelected
+                      ? "bg-cyan-500/20 border-cyan-500/40 scale-[0.98]"
+                      : "bg-white/[0.03] border-white/10 hover:bg-white/[0.08] hover:border-white/20 hover:scale-[1.01]"
+                  }
+                  ${selectedAnswer && !isSelected ? "opacity-50" : ""}
+                  disabled:cursor-default
+                `}
+                style={{
+                  animationDelay: `${index * 0.08}s`,
+                }}
+              >
+                <span
                   className={`
-                    w-full text-left p-4 sm:p-5 rounded-2xl border transition-all duration-300
-                    flex items-center gap-4 group cursor-pointer
+                    w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0
+                    transition-all duration-300
                     ${
                       isSelected
-                        ? "bg-cyan-500/20 border-cyan-500/40 scale-[0.98]"
-                        : "bg-white/[0.03] border-white/10 hover:bg-white/[0.08] hover:border-white/20 hover:scale-[1.01]"
+                        ? "bg-cyan-500 text-white"
+                        : "bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white"
                     }
-                    ${selectedAnswer && !isSelected ? "opacity-50" : ""}
-                    disabled:cursor-default
                   `}
-                  style={{
-                    animationDelay: `${index * 0.08}s`,
-                  }}
                 >
-                  <span
-                    className={`
-                      w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0
-                      transition-all duration-300
-                      ${
-                        isSelected
-                          ? "bg-cyan-500 text-white"
-                          : "bg-white/5 text-slate-400 group-hover:bg-white/10 group-hover:text-white"
-                      }
-                    `}
-                  >
-                    {letter}
-                  </span>
-                  <span
-                    className={`text-sm sm:text-base ${
-                      isSelected ? "text-white font-medium" : "text-slate-300"
-                    }`}
-                  >
-                    {option}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {letter}
+                </span>
+                <span
+                  className={`text-sm sm:text-base ${
+                    isSelected ? "text-white font-medium" : "text-slate-300"
+                  }`}
+                >
+                  {option}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

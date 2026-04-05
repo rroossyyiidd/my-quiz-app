@@ -36,7 +36,7 @@ export default function AuthenticatedLayout({
   return (
     <div className="min-h-dvh flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 glass border-b border-white/5">
+      <header className="sticky top-0 z-50 bg-[#0a0e1a]/90 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
