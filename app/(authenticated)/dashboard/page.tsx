@@ -7,7 +7,7 @@ import { Card } from "@/app/_components/card";
 import type { TQuizHistoryItem } from "@/api/quiz/type";
 import { useEffect, useState } from "react";
 
-const QUIZ_HISTORY_KEY = "quiz_app_history";
+const QUIZ_HISTORY_KEY = process.env.NEXT_PUBLIC_QUIZ_HISTORY_KEY || "quiz_app_history";
 
 function getQuizHistory(userId: string): TQuizHistoryItem[] {
   if (typeof window === "undefined") return [];

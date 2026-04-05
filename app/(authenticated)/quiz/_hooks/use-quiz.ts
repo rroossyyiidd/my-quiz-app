@@ -9,7 +9,7 @@ import { useQuizResult } from "./use-quiz-result";
 import { useAuth } from "@/libs/auth-context";
 
 const TIMER_SECONDS = 60;
-const QUIZ_HISTORY_KEY = "quiz_app_history";
+const QUIZ_HISTORY_KEY = process.env.NEXT_PUBLIC_QUIZ_HISTORY_KEY || "quiz_app_history";
 
 export function useQuiz() {
   const { user } = useAuth();

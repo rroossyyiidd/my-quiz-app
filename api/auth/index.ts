@@ -1,7 +1,7 @@
 import type { TLoginPayload, TRegisterPayload, TStoredUser, TUser } from "./type";
 
-const USERS_KEY = "quiz_app_users";
-const CURRENT_USER_KEY = "quiz_app_current_user";
+const USERS_KEY = process.env.NEXT_PUBLIC_USERS_KEY || "quiz_app_users";
+const CURRENT_USER_KEY = process.env.NEXT_PUBLIC_CURRENT_USER_KEY || "quiz_app_current_user";
 
 function getStoredUsers(): TStoredUser[] {
   if (typeof window === "undefined") return [];

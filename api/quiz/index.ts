@@ -22,9 +22,11 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export async function fetchQuizQuestions(): Promise<TQuizQuestion[]> {
-  const response = await fetch(
-    "https://opentdb.com/api.php?amount=5&category=18&type=multiple"
-  );
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error("NEXT_PUBLIC_API_URL is not defined");
+  }
+  const response = await fetch(apiUrl);
 
   if (!response.ok) {
     throw new Error("Failed to fetch quiz questions");
