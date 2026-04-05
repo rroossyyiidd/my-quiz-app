@@ -15,9 +15,9 @@ export function Card({ children, className = "", hover = false, style }: CardPro
       style={style}
       className={`
         relative overflow-hidden rounded-2xl
-        bg-white/5 backdrop-blur-xl
+        bg-slate-900/70 backdrop-blur-xl
         border border-white/10
-        ${hover ? "transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-0.5" : ""}
+        ${hover ? "transition-all duration-300 hover:bg-slate-800/80 hover:border-white/20 hover:shadow-lg hover:shadow-cyan-500/10 hover:-translate-y-0.5" : ""}
         ${className}
       `}
     >
