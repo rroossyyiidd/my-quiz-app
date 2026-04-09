@@ -41,9 +41,18 @@ export function QuizRunner({
     }, 600);
   };
 
-  const timerPercentage = (timeLeft / 60) * 100;
-  const isTimerWarning = timeLeft <= 10;
-  const isTimerCritical = timeLeft <= 5;
+  const timerPercentage = (timeLeft / 300) * 100;
+  const isTimerWarning = timeLeft <= 60;
+  const isTimerCritical = timeLeft <= 30;
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (mins > 0) {
+      return `${mins}:${secs.toString().padStart(2, "0")}`;
+    }
+    return `${secs}s`;
+  };
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
@@ -111,7 +120,7 @@ export function QuizRunner({
                       : "text-white"
                 }`}
               >
-                {timeLeft}s
+                {formatTime(timeLeft)}
               </span>
             </div>
           </div>

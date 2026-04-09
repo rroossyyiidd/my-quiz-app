@@ -8,7 +8,7 @@ import { useSubmitQuiz } from "./use-submit-quiz";
 import { useQuizResult } from "./use-quiz-result";
 import { useAuth } from "@/libs/auth-context";
 
-const TIMER_SECONDS = 60;
+const TIMER_SECONDS = 300;
 const QUIZ_HISTORY_KEY = process.env.NEXT_PUBLIC_QUIZ_HISTORY_KEY || "quiz_app_history";
 const QUIZ_PROGRESS_KEY = "quiz_app_progress";
 
@@ -182,7 +182,6 @@ export function useQuiz() {
         currentQuestionIndex < questionsQuery.data.length - 1
       ) {
         setCurrentQuestionIndex((prev) => prev + 1);
-        setTimeLeft(TIMER_SECONDS);
         questionStartTimeRef.current = Date.now();
       } else {
         submitAnswers(newAnswers);

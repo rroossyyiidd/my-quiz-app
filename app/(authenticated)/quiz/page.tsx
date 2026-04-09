@@ -88,7 +88,7 @@ export default function QuizPage() {
                 Ready to Begin?
               </h2>
               <p className="text-slate-400 mb-8 text-sm sm:text-base max-w-sm mx-auto">
-                You&apos;ll answer 5 computer science questions. You have 60 seconds per question.
+                You&apos;ll answer 5 computer science questions. You have 5 minutes for entire quiz.
                 The quiz will run in full-screen mode.
               </p>
             </>
@@ -105,7 +105,7 @@ export default function QuizPage() {
               <svg className="w-4 h-4 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-xs text-slate-300">60s per question</span>
+              <span className="text-xs text-slate-300">5 minutes total</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
               <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

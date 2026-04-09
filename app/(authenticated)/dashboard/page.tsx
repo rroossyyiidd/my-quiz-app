@@ -131,7 +131,7 @@ export default function DashboardPage() {
             <p className="text-slate-400 text-sm sm:text-base max-w-lg">
               {showContinueQuiz
                 ? "You have an unfinished quiz. Continue where you left off."
-                : "5 multiple-choice questions • Science: Computers • 60 seconds per question"}
+                : "5 multiple-choice questions • Science: Computers • 5 minutes for entire quiz"}
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
               <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium border border-cyan-500/20">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
                 5 Questions
               </span>
               <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium border border-emerald-500/20">
-                60s Timer
+                5 Min Timer
               </span>
             </div>
           </div>
