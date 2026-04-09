@@ -23,7 +23,7 @@ export function loginUser(payload: TLoginPayload): TUser {
     throw new Error("Invalid username or password");
   }
 
-  const { password: _, ...safeUser } = user;
+  const { password: _password, ...safeUser } = user;
   localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(safeUser));
   return safeUser;
 }
@@ -46,7 +46,7 @@ export function registerUser(payload: TRegisterPayload): TUser {
 
   saveStoredUsers([...users, newUser]);
 
-  const { password: _, ...safeUser } = newUser;
+  const { password: _password, ...safeUser } = newUser;
   localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(safeUser));
   return safeUser;
 }

@@ -10,6 +10,47 @@ import { useAuth } from "@/libs/auth-context";
 
 const TIMER_SECONDS = 60;
 const QUIZ_HISTORY_KEY = process.env.NEXT_PUBLIC_QUIZ_HISTORY_KEY || "quiz_app_history";
+const QUIZ_PROGRESS_KEY = "quiz_app_progress";
+
+interface QuizProgress {
+  currentQuestionIndex: number;
+  answers: TQuizAnswer[];
+  timeLeft: number;
+  savedAt: number;
+}
+
+function saveProgress(currentQuestionIndex: number, answers: TQuizAnswer[], timeLeft: number) {
+  if (typeof window === "undefined") return;
+  const progress: QuizProgress = {
+    currentQuestionIndex,
+    answers,
+    timeLeft,
+    savedAt: Date.now(),
+  };
+  localStorage.setItem(QUIZ_PROGRESS_KEY, JSON.stringify(progress));
+}
+
+function loadProgress(): QuizProgress | null {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem(QUIZ_PROGRESS_KEY);
+  if (!saved) return null;
+  try {
+    const progress: QuizProgress = JSON.parse(saved);
+    const maxAge = 24 * 60 * 60 * 1000;
+    if (Date.now() - progress.savedAt > maxAge) {
+      localStorage.removeItem(QUIZ_PROGRESS_KEY);
+      return null;
+    }
+    return progress;
+  } catch {
+    return null;
+  }
+}
+
+function clearProgress() {
+  if (typeof window === "undefined") return;
+  localStorage.removeItem(QUIZ_PROGRESS_KEY);
+}
 
 export function useQuiz() {
   const { user } = useAuth();
@@ -31,27 +72,41 @@ export function useQuiz() {
   // Result polling
   const resultQuery = useQuizResult(taskId);
 
-  // Start the quiz
-  const startQuiz = useCallback(() => {
-    setStatus(QuizStatus.LOADING);
-    setCurrentQuestionIndex(0);
-    setAnswers([]);
-    setTaskId(null);
-    setError(null);
-  }, []);
+  // Load saved progress on mount
+  const [hasRestoredProgress, setHasRestoredProgress] = useState(false);
+
+  useEffect(() => {
+    const progress = loadProgress();
+    if (progress && user) {
+      setCurrentQuestionIndex(progress.currentQuestionIndex);
+      setAnswers(progress.answers);
+      setTimeLeft(progress.timeLeft);
+      setStatus(QuizStatus.LOADING);
+      setHasRestoredProgress(true);
+    }
+  }, [user]);
+
+  // Save progress when it changes
+  useEffect(() => {
+    if (status === QuizStatus.IN_PROGRESS && answers.length > 0) {
+      saveProgress(currentQuestionIndex, answers, timeLeft);
+    }
+  }, [status, currentQuestionIndex, answers, timeLeft]);
 
   // Handle questions fetched
   useEffect(() => {
     if (questionsQuery.data && status === QuizStatus.LOADING) {
       setStatus(QuizStatus.IN_PROGRESS);
-      setTimeLeft(TIMER_SECONDS);
+      if (!hasRestoredProgress) {
+        setTimeLeft(TIMER_SECONDS);
+      }
       questionStartTimeRef.current = Date.now();
     }
     if (questionsQuery.error && status === QuizStatus.LOADING) {
       setError(questionsQuery.error.message);
       setStatus(QuizStatus.ERROR);
     }
-  }, [questionsQuery.data, questionsQuery.error, status]);
+  }, [questionsQuery.data, questionsQuery.error, status, hasRestoredProgress]);
 
   // Timer logic
   useEffect(() => {
@@ -71,17 +126,6 @@ export function useQuiz() {
       };
     }
   }, [status, currentQuestionIndex]);
-
-  // Handle time expiry
-  useEffect(() => {
-    if (timeLeft === 0 && status === QuizStatus.IN_PROGRESS && questionsQuery.data) {
-      const question = questionsQuery.data[currentQuestionIndex];
-      if (question) {
-        handleAnswer("", question);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
 
   // Submit answers after all questions answered
   const submitAnswers = useCallback(
@@ -137,22 +181,32 @@ export function useQuiz() {
         questionsQuery.data &&
         currentQuestionIndex < questionsQuery.data.length - 1
       ) {
-        // Next question
         setCurrentQuestionIndex((prev) => prev + 1);
         setTimeLeft(TIMER_SECONDS);
         questionStartTimeRef.current = Date.now();
       } else {
-        // All done — submit
         submitAnswers(newAnswers);
       }
     },
     [answers, currentQuestionIndex, questionsQuery.data, submitAnswers]
   );
 
+  // Handle time expiry
+  useEffect(() => {
+    if (timeLeft === 0 && status === QuizStatus.IN_PROGRESS && questionsQuery.data) {
+      const question = questionsQuery.data[currentQuestionIndex];
+      if (question) {
+        handleAnswer("", question);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft]);
+
   // Handle result polling completion
   useEffect(() => {
     if (resultQuery.data?.status === "completed") {
       setStatus(QuizStatus.COMPLETED);
+      clearProgress();
 
       // Save to history
       if (user && resultQuery.data) {
@@ -178,6 +232,7 @@ export function useQuiz() {
 
   // Restart quiz
   const restart = useCallback(() => {
+    clearProgress();
     setStatus(QuizStatus.IDLE);
     setCurrentQuestionIndex(0);
     setAnswers([]);
@@ -185,6 +240,17 @@ export function useQuiz() {
     setError(null);
     setTimeLeft(TIMER_SECONDS);
     if (timerRef.current) clearInterval(timerRef.current);
+  }, []);
+
+  // Start quiz
+  const startQuiz = useCallback(() => {
+    clearProgress();
+    setStatus(QuizStatus.LOADING);
+    setCurrentQuestionIndex(0);
+    setAnswers([]);
+    setTaskId(null);
+    setError(null);
+    setHasRestoredProgress(false);
   }, []);
 
   return {

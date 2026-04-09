@@ -5,9 +5,10 @@ import { useAuth } from "@/libs/auth-context";
 import { Button } from "@/app/_components/button";
 import { Card } from "@/app/_components/card";
 import type { TQuizHistoryItem } from "@/api/quiz/type";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 const QUIZ_HISTORY_KEY = process.env.NEXT_PUBLIC_QUIZ_HISTORY_KEY || "quiz_app_history";
+const QUIZ_PROGRESS_KEY = "quiz_app_progress";
 
 function getQuizHistory(userId: string): TQuizHistoryItem[] {
   if (typeof window === "undefined") return [];
@@ -15,9 +16,23 @@ function getQuizHistory(userId: string): TQuizHistoryItem[] {
   return data ? JSON.parse(data) : [];
 }
 
+function hasSavedProgress(): boolean {
+  if (typeof window === "undefined") return false;
+  const saved = localStorage.getItem(QUIZ_PROGRESS_KEY);
+  if (!saved) return false;
+  try {
+    const progress = JSON.parse(saved);
+    const maxAge = 24 * 60 * 60 * 1000;
+    return Date.now() - progress.savedAt <= maxAge;
+  } catch {
+    return false;
+  }
+}
+
 export default function DashboardPage() {
   const { user } = useAuth();
   const router = useRouter();
+
   const [history, setHistory] = useState<TQuizHistoryItem[]>([]);
 
   useEffect(() => {
@@ -25,6 +40,14 @@ export default function DashboardPage() {
       setHistory(getQuizHistory(user.id));
     }
   }, [user]);
+
+  const [hasUnfinishedQuiz, setHasUnfinishedQuiz] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setHasUnfinishedQuiz(hasSavedProgress());
+  }, []);
+
+  const showContinueQuiz = hasUnfinishedQuiz === true;
 
   const bestScore =
     history.length > 0
@@ -103,10 +126,12 @@ export default function DashboardPage() {
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">
-              Computer Science Placement Test
+              {showContinueQuiz ? "Continue Your Quiz" : "Computer Science Placement Test"}
             </h2>
             <p className="text-slate-400 text-sm sm:text-base max-w-lg">
-              5 multiple-choice questions • Science: Computers • 60 seconds per question
+              {showContinueQuiz
+                ? "You have an unfinished quiz. Continue where you left off."
+                : "5 multiple-choice questions • Science: Computers • 60 seconds per question"}
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
               <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium border border-cyan-500/20">
@@ -128,7 +153,7 @@ export default function DashboardPage() {
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
             </svg>
-            Start Quiz
+            {hasUnfinishedQuiz ? "Continue Quiz" : "Start Quiz"}
           </Button>
         </div>
       </Card>

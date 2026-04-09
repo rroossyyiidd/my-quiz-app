@@ -20,14 +20,16 @@ export function QuizRunner({
   timeLeft,
   onAnswer,
 }: QuizRunnerProps) {
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  // Reset selection on question change
+  const key = `${questionIndex}-${question.id}`;
+  
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(() => null);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(() => false);
+  
+  // Reset when question changes - necessary for local UI state management
   useEffect(() => {
     setSelectedAnswer(null);
     setIsTransitioning(false);
-  }, [questionIndex]);
+  }, [key]);
 
   const handleSelect = (answer: string) => {
     if (selectedAnswer || isTransitioning) return;

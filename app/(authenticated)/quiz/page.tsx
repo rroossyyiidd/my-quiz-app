@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { QuizStatus } from "@/common/enums/quiz";
 import { useQuiz } from "./_hooks/use-quiz";
 import { QuizLoading } from "./_components/quiz-loading";
@@ -10,9 +11,35 @@ import { QuizError } from "./_components/quiz-error";
 import { Button } from "@/app/_components/button";
 import { Card } from "@/app/_components/card";
 import { useRouter } from "next/navigation";
+import type { TQuizAnswer } from "@/api/quiz/type";
+
+const QUIZ_PROGRESS_KEY = "quiz_app_progress";
+
+interface QuizProgress {
+  currentQuestionIndex: number;
+  answers: TQuizAnswer[];
+  timeLeft: number;
+  savedAt: number;
+}
 
 export default function QuizPage() {
   const router = useRouter();
+  const [hasSavedProgress, setHasSavedProgress] = useState<boolean | null>(null);
+  const showSavedProgress = hasSavedProgress === true;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem(QUIZ_PROGRESS_KEY);
+    if (!saved) return;
+    try {
+      const progress = JSON.parse(saved) as QuizProgress;
+      const maxAge = 24 * 60 * 60 * 1000;
+      setHasSavedProgress(Date.now() - progress.savedAt <= maxAge);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const {
     status,
     currentQuestionIndex,
@@ -46,13 +73,26 @@ export default function QuizPage() {
               />
             </svg>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-            Ready to Begin?
-          </h2>
-          <p className="text-slate-400 mb-8 text-sm sm:text-base max-w-sm mx-auto">
-            You&apos;ll answer 5 computer science questions. You have 60 seconds per question.
-            The quiz will run in full-screen mode.
-          </p>
+          {showSavedProgress ? (
+            <>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                Continue Your Quiz?
+              </h2>
+              <p className="text-slate-400 mb-8 text-sm sm:text-base max-w-sm mx-auto">
+                You have an unfinished quiz. Would you like to continue where you left off?
+              </p>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                Ready to Begin?
+              </h2>
+              <p className="text-slate-400 mb-8 text-sm sm:text-base max-w-sm mx-auto">
+                You&apos;ll answer 5 computer science questions. You have 60 seconds per question.
+                The quiz will run in full-screen mode.
+              </p>
+            </>
+          )}
 
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10">
@@ -77,10 +117,21 @@ export default function QuizPage() {
 
           <div className="flex flex-col sm:flex-row gap-3">
             <Button onClick={startQuiz} size="lg" className="flex-1">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-              </svg>
-              Start Quiz
+              {showSavedProgress ? (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                  </svg>
+                  Continue Quiz
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                  </svg>
+                  Start Quiz
+                </>
+              )}
             </Button>
             <Button
               onClick={() => router.push("/dashboard")}
