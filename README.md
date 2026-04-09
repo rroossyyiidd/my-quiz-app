@@ -19,8 +19,8 @@ An interactive web application for **Computer Science placement tests**. Users c
 ## Key Features
 
 - **Registration & Login** — localStorage-based authentication with form validation
-- **Dashboard** — Summary statistics (tests taken, tests passed, best score) and quiz history
-- **Quiz Engine** — 5 multiple-choice questions from OpenTDB, 60-second timer per question, auto-submit on timeout
+- **Dashboard** — Summary statistics (tests taken, tests passed, best score), quiz history with continue quiz feature
+- **Quiz Engine** — 5 multiple-choice questions from OpenTDB, 5-minute total timer, auto-submit on timeout, progress auto-save
 - **Async Result Processing** — Submit quiz to API Route (mock), poll status until `completed`
 - **Quiz History** — Per-user history stored in localStorage
 - **Responsive & Animated UI** — Dark theme, gradient mesh background, glassmorphism cards, micro-animations
@@ -45,21 +45,21 @@ my-quiz-app/
 │   │   ├── login/page.tsx        #   Login page
 │   │   └── register/page.tsx     #   Registration page
 │   ├── (authenticated)/          # Route group: protected pages
-│   │   ├── layout.tsx            #   Authenticated layout (header, auth guard)
-│   │   ├── dashboard/page.tsx    #   Dashboard & quiz history
-│   │   └── quiz/                 #   Quiz module
-│   │       ├── page.tsx          #     Quiz page (state machine UI)
-│   │       ├── _components/      #     Quiz-specific components
-│   │       │   ├── quiz-loading.tsx
-│   │       │   ├── quiz-runner.tsx
-│   │       │   ├── quiz-processing.tsx
-│   │       │   ├── quiz-result.tsx
-│   │       │   └── quiz-error.tsx
-│   │       └── _hooks/           #     Quiz-specific hooks
-│   │           ├── use-quiz.ts           # Main quiz state machine
-│   │           ├── use-quiz-questions.ts # Fetch questions (useQuery)
-│   │           ├── use-submit-quiz.ts    # Submit answers (useMutation)
-│   │           └── use-quiz-result.ts    # Poll result (useQuery + refetchInterval)
+│   │   ├── layout.tsx            #   Authenticated layout (header, sign out modal, auth guard)
+│   ├── dashboard/page.tsx        #   Dashboard & quiz history
+│   └── quiz/                 #   Quiz module
+│       ├── page.tsx          #     Quiz page (state machine UI)
+│       ├── _components/      #     Quiz-specific components
+│       │   ├── quiz-loading.tsx
+│       │   ├── quiz-runner.tsx
+│       │   ├── quiz-processing.tsx
+│       │   ├── quiz-result.tsx
+│       │   └── quiz-error.tsx
+│       └── _hooks/           #     Quiz-specific hooks
+│           ├── use-quiz.ts           # Main quiz state machine
+│           ├── use-quiz-questions.ts # Fetch questions (useQuery)
+│           ├── use-submit-quiz.ts    # Submit answers (useMutation)
+│           └── use-quiz-result.ts    # Poll result (useQuery + refetchInterval)
 │   └── api/                      # Next.js API Routes (Route Handlers)
 │       └── placement-test/
 │           ├── _store.ts         #   In-memory result store (globalThis)
@@ -77,7 +77,6 @@ my-quiz-app/
 ├── common/                       # Shared constants, enums, types
 │   ├── enums/
 │   │   └── quiz.ts               #   QuizStatus enum (IDLE → COMPLETED)
-│   ├── constants/                #   (reserved)
 │   └── types/
 │       └── response.ts           #   Generic API response types
 │
@@ -85,8 +84,6 @@ my-quiz-app/
 │   ├── auth-context.tsx          #   AuthProvider + useAuth hook
 │   └── query-provider.tsx        #   TanStack QueryClientProvider wrapper
 │
-├── types/                        # TypeScript declaration files (*.d.ts)
-├── utils/                        # Utility functions
 ├── docs/
 │   └── guidelines.md             # Coding & module structure guidelines
 ├── public/                       # Static assets (SVG icons)
@@ -155,7 +152,7 @@ The quiz is managed via the `QuizStatus` enum in `use-quiz.ts`:
                          └───────────┘
 ```
 
-**Timer:** Each question has a 60-second countdown. If time runs out, the answer is automatically submitted as blank and the quiz advances to the next question.
+**Timer:** Quiz has a 5-minute (300 seconds) total countdown. If time runs out, the current answer is automatically submitted as blank and the quiz advances. Progress is auto-saved to localStorage every change.
 
 ## API Routes
 
